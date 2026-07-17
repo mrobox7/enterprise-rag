@@ -5,6 +5,8 @@ from typing import cast
 
 import logfire
 
+from app.config.logging import configure_logging
+from app.config.settings import settings
 from app.ingestion.manifest import IngestionManifest
 from app.ingestion.pipeline import IngestionPipeline
 from app.utils.compute_file_hash import ComputeFileHash
@@ -182,6 +184,8 @@ def run_ingestion(
 
 
 def main() -> None:
+    configure_logging()
+
     parser = argparse.ArgumentParser(description="Enterprise RAG Ingestion Processor")
 
     _ = parser.add_argument(
@@ -190,12 +194,6 @@ def main() -> None:
         type=Path,
         required=True,
         help="Directory containing documents (may contain sub-folders per source type)",
-    )
-    _ = parser.add_argument(
-        "-c",
-        "--collection",
-        required=True,
-        help="Qdrant collection name",
     )
     _ = parser.add_argument(
         "-s",
@@ -224,7 +222,6 @@ def main() -> None:
     args = parser.parse_args()
 
     directory = cast(Path, args.directory)
-    collection = cast(str, args.collection)
     source_type = cast(str | None, args.source_type)
     recursive = cast(bool, args.recursive)
     wipe = cast(bool, args.wipe)
@@ -239,7 +236,7 @@ def main() -> None:
     results = run_ingestion(
         pipeline=pipeline,
         base_dir=directory,
-        collection_name=collection,
+        collection_name=settings.qdrant_collection_name,
         explicit_source_type=source_type,
         wipe=wipe,
         recursive=recursive,

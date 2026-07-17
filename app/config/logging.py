@@ -1,7 +1,6 @@
 import logfire
 
-logger = logfire.configure(
-    service_name="enterprise-rag",
-)
 
-logfire.instrument_pydantic()
+def configure_logging() -> None:
+    _ = logfire.configure(service_name="enterprise-rag")
+    logfire.instrument_pydantic(include=("app.*",))

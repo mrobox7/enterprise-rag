@@ -1,4 +1,6 @@
-.PHONY: install dev lint format check
+.PHONY: install dev lint format check ingest
+
+DIR ?= data
 
 install:
 	uv sync
@@ -14,3 +16,6 @@ format:
 
 check:
 	uv run basedpyright
+
+ingest:
+	uv run python -m app.ingestion.processor -d $(DIR) $(ARGS)

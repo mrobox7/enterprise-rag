@@ -15,12 +15,19 @@ class Settings(BaseSettings):
     embedding_model: str = "models/gemini-embedding-2"
     embedding_batch_size: int = 50
 
+    # llm
+    llm_model: str = "llama-3.3-70b-versatile"
+
     # gemini
     gemini_api_key: SecretStr | None = None
+
+    # groq
+    groq_api_key: SecretStr | None = None
 
     # Qdrant
     qdrant_url: str = "http://localhost:6333"
     qdrant_api_key: str | None = None
+    qdrant_collection_name: str = "enterprise_rag"
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file=".env",

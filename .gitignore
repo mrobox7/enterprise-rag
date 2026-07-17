@@ -16,5 +16,8 @@ wheels/
 # Ruff
 .ruff_cache/
 
+# Ingestion source documents
+data/
+
 # Exceptions
 !.env.example

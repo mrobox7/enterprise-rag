@@ -10,7 +10,9 @@ from qdrant_client.models import (
     FieldCondition,
     Filter,
     MatchValue,
+    PayloadSchemaType,
     PointStruct,
+    ScoredPoint,
     VectorParams,
 )
 
@@ -70,27 +72,34 @@ class QdrantVectorStore:
         collections = self.client.get_collections().collections
 
         if any(c.name == collection_name for c in collections):
-            self._known_collections.add(collection_name)
             logfire.info(
                 "📁 Collection already exists",
                 collection=collection_name,
             )
-            return
+        else:
+            _ = self.client.create_collection(
+                collection_name=collection_name,
+                vectors_config=VectorParams(
+                    size=vector_size,
+                    distance=Distance.COSINE,
+                ),
+            )
+            logfire.info(
+                "✅ Collection created",
+                collection=collection_name,
+                dimension=vector_size,
+            )
 
-        _ = self.client.create_collection(
+        # delete_by_source() filters on "source" — Qdrant (especially
+        # Cloud) rejects filtering on a field with no payload index, so
+        # this must exist before any delete/filter runs. Idempotent.
+        _ = self.client.create_payload_index(
             collection_name=collection_name,
-            vectors_config=VectorParams(
-                size=vector_size,
-                distance=Distance.COSINE,
-            ),
+            field_name="source",
+            field_schema=PayloadSchemaType.KEYWORD,
         )
-        self._known_collections.add(collection_name)
 
-        logfire.info(
-            "✅ Collection created",
-            collection=collection_name,
-            dimension=vector_size,
-        )
+        self._known_collections.add(collection_name)
 
     def upsert(
         self,
@@ -135,7 +144,7 @@ class QdrantVectorStore:
         collection_name: str,
         query_vector: list[float],
         limit: int = 5,
-    ):
+    ) -> list[ScoredPoint]:
         """Search similar vectors."""
 
         with logfire.span(
