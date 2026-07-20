@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     qdrant_api_key: str | None = None
     qdrant_collection_name: str = "enterprise_rag"
 
+    # Retrieval / reranking
+    retrieval_candidate_k: int = 20
+    rerank_top_n: int = 5
+    reranker_model: str = "ms-marco-MiniLM-L-6-v2"
+
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

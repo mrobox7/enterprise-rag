@@ -27,9 +27,11 @@ dependencies = [
     "qdrant-client>=1.18.0",
     # UI
     "streamlit>=1.59.2",
+    "requests>=2.34.2",
     # Observeability & Tracing
     "logfire[fastapi]>=4.37.0",
     "langfuse>=4.14.0",
+    "flashrank>=0.2.10",
 ]
 
 [dependency-groups]
@@ -38,3 +40,9 @@ dev = [
     "basedpyright>=1.39.9",
     "pre-commit>=4.6.0",
 ]
+
+[tool.basedpyright]
+typeCheckingMode = "standard"
+
+[tool.ruff.lint.per-file-ignores]
+"app/main.py" = ["E402"]  # configure_logging() must run before importing modules that log on import

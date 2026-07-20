@@ -1,4 +1,4 @@
-.PHONY: install dev lint format check ingest
+.PHONY: install dev ui lint format check ingest
 
 DIR ?= data
 
@@ -7,6 +7,9 @@ install:
 
 dev:
 	uv run uvicorn app.main:app --reload
+
+ui:
+	uv run streamlit run ui/app.py
 
 lint:
 	uv run ruff check .
