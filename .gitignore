@@ -16,6 +16,10 @@ wheels/
 # Ruff
 .ruff_cache/
 
+# Claude Code / agent skill symlinks (auto-discovered from installed packages)
+.claude/skills/
+.agents/skills/
+
 # Ingestion source documents
 data/
 
