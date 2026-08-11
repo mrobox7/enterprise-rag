@@ -8,6 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     # application
     app_name: str = "Enterprise RAG"
+    project_domain: str = "Kubernetes, Intel hardware, and enterprise networking"
     environment: str = "development"
     backend_url: str = "http://localhost:8000"
 
@@ -17,6 +18,11 @@ class Settings(BaseSettings):
 
     # llm
     llm_model: str = "llama-3.3-70b-versatile"
+
+    # RAGAS eval judge — deliberately a different Groq model than `llm_model`.
+    # Groq tracks token quota per model, so this gets its own daily budget
+    # instead of competing with the responder's for the same one.
+    eval_judge_model: str = "llama-3.1-8b-instant"
 
     # gemini
     gemini_api_key: SecretStr | None = None
@@ -31,7 +37,7 @@ class Settings(BaseSettings):
 
     # Retrieval / reranking
     retrieval_candidate_k: int = 20
-    rerank_top_n: int = 5
+    rerank_top_n: int = 3
     reranker_model: str = "ms-marco-MiniLM-L-6-v2"
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(

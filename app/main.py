@@ -11,7 +11,10 @@ from fastapi.responses import JSONResponse, Response
 from app.agents.graph import rag_agent
 from app.agents.state import AgentState, Message
 from app.config.settings import settings
+from app.guardrails.rails import guard, initialize_rails
 from app.models.query import QueryRequest, QueryResponse
+
+initialize_rails()
 
 app = FastAPI(title=settings.app_name)
 
@@ -38,15 +41,25 @@ def query(request: QueryRequest) -> QueryResponse:
     Executes the LangGraph RAG flow via a POST request.
     No conversation memory yet — every call starts from a blank slate.
     """
-    initial_state = AgentState(
-        messages=[Message(role="user", content=request.q)],
-        current_query=request.q,
-        documents=[],
-        plan=["Start"],
-        status="Initializing Graph...",
-    )
-
     with logfire.span("🚀 Query received", question=request.q):
+        blocked, rail_response = guard(request.q)
+        if blocked:
+            return QueryResponse(
+                question=request.q,
+                answer=rail_response or "",
+                thought_process=["Blocked by guardrails."],
+                status="blocked",
+                sources=[],
+            )
+
+        initial_state = AgentState(
+            messages=[*request.messages, Message(role="user", content=request.q)],
+            current_query=request.q,
+            documents=[],
+            plan=["Start"],
+            status="Initializing Graph...",
+        )
+
         try:
             raw_output = cast(
                 dict[str, object],

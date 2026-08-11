@@ -1,9 +1,12 @@
-.PHONY: install dev ui lint format check ingest
+.PHONY: install dev ui lint format check ingest eval
 
 DIR ?= data
 
 install:
 	uv sync
+
+eval:
+	uv run --group eval python -m app.evals.run_eval $(ARGS)
 
 dev:
 	uv run uvicorn app.main:app --reload

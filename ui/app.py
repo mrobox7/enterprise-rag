@@ -24,6 +24,10 @@ for message in st.session_state.messages:
 query = st.chat_input("Ask a question...")
 
 if query:
+    history_payload = [
+        {"role": m["role"], "content": m["content"]} for m in st.session_state.messages
+    ]
+
     st.session_state.messages.append({"role": "user", "content": query})
     with st.chat_message("user"):
         st.markdown(query)
@@ -33,7 +37,7 @@ if query:
             with st.spinner("Thinking..."):
                 http_response = requests.post(
                     f"{settings.backend_url}/query",
-                    json={"q": query},
+                    json={"q": query, "messages": history_payload},
                     timeout=60,
                 )
                 http_response.raise_for_status()
